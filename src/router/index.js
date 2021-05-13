@@ -7,12 +7,12 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: () => import('../views/Home.vue')
+    redirect: '/home'
   },
   {
-    path:'/',
-    redirect:'/login'
+    path: '/home',
+    name: 'home',
+    component: () => import('../views/Home.vue')
   },
   {
     path: '/login',
@@ -25,6 +25,15 @@ const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
+})
+
+// 挂载路由导航守卫-控制访问权限
+router.beforeEach((to, from, next) => {
+  if (to.path === '/login') return next()
+  // 获取token
+  const tokenStr = sessionStorage.getItem('token')
+  if (!tokenStr) return next('/login')
+  next()
 })
 
 export default router

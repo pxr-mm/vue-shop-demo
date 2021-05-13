@@ -60,13 +60,13 @@
 </template>
 
 <script>
-import { Swiper, SwiperSlide } from "vue-awesome-swiper";
+import { Swiper, SwiperSlide } from 'vue-awesome-swiper'
 export default {
   components: {
     Swiper,
     SwiperSlide
   },
-  data() {
+  data () {
     return {
       swiperOptions: {
         slidesPerView: 4,
@@ -75,18 +75,19 @@ export default {
         freeMode: true,
         mousewheel: true,
         navigation: {
-          nextEl: ".swiper-button-next",
-          prevEl: ".swiper-button-prev"
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev'
         }
       },
       stepActive: 6
-    };
+    }
   }
-};
+}
 </script>
 
 <style lang="scss" scoped>
 .lunbotu {
   width: 300px;
+  height: 300px;
 }
 </style>
