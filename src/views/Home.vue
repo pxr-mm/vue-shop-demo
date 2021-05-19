@@ -2,6 +2,14 @@
   <el-container class="home-container">
     <el-header class="header-content">
       <div class="header-main">
+        <!-- 折叠菜单栏 -->
+        <div
+          class="toggle-button"
+          :class="collapse ? 'toggle-button-active' : 'toggle-button-active2'"
+          @click="changeMenuCollapse"
+        >
+          |||
+        </div>
         <img src="../assets/images/book.png" alt="" />
         <div class="header-project-name">电商后台管理系统</div>
       </div>
@@ -10,7 +18,7 @@
       </div>
     </el-header>
     <el-container>
-      <el-aside width="200px" class="aside-content">
+      <el-aside :width="!collapse ? '200px' : '64px'" class="aside-content">
         <el-menu
           default-active="2"
           class="el-menu-vertical-demo"
@@ -19,40 +27,39 @@
           background-color="#545c64"
           text-color="#fff"
           active-text-color="#ffd04b"
+          unique-opened
+          :collapse="collapse"
+          :collapse-transition="false"
+          router
         >
-          <el-submenu index="1">
+          <el-submenu
+            :index="item.id + ''"
+            v-for="item in menusList"
+            :key="item.id"
+          >
             <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>导航一</span>
+              <i :class="iconList[item.id]"></i>
+              <span>{{ item.authName }}</span>
             </template>
-            <el-menu-item-group>
-              <template slot="title">分组一</template>
-              <el-menu-item index="1-1">选项1</el-menu-item>
-              <el-menu-item index="1-2">选项2</el-menu-item>
-            </el-menu-item-group>
-            <el-menu-item-group title="分组2">
-              <el-menu-item index="1-3">选项3</el-menu-item>
-            </el-menu-item-group>
-            <el-submenu index="1-4">
-              <template slot="title">选项4</template>
-              <el-menu-item index="1-4-1">选项1</el-menu-item>
-            </el-submenu>
+            <!-- 二级菜单 -->
+            <el-menu-item
+              :index="'/'+subItem.path"
+              v-for="subItem in item.children"
+              :key="subItem.id"
+            >
+              <i class="el-icon-menu"></i>
+              {{ subItem.authName }}
+            </el-menu-item>
           </el-submenu>
           <el-menu-item index="2">
-            <i class="el-icon-menu"></i>
+            <i class="iconfont icon-iconfonticon-shebei"></i>
             <span slot="title">导航二</span>
-          </el-menu-item>
-          <el-menu-item index="3" disabled>
-            <i class="el-icon-document"></i>
-            <span slot="title">导航三</span>
-          </el-menu-item>
-          <el-menu-item index="4">
-            <i class="el-icon-setting"></i>
-            <span slot="title">导航四</span>
           </el-menu-item>
         </el-menu>
       </el-aside>
       <el-main>
+        <!-- 路由占位符 -->
+        <router-view></router-view>
         <div>
           <swiper></swiper>
         </div>
@@ -70,7 +77,21 @@ export default {
     swiper
   },
   data() {
-    return {}
+    return {
+      menusList: [],
+      collapse: false,
+      iconList: {
+        '125': 'iconfont icon-iconfonticon-shebei',
+        '103': 'iconfont icon-iconfonticon-shebei1',
+        '101': 'iconfont icon-iconfont_pifu',
+        '102': 'iconfont icon-iconfonticon-yonghu1',
+        '125': 'iconfont icon-iconfonticon-zichan',
+        '145': 'iconfont icon-iconfonticon3'
+      }
+    }
+  },
+  created() {
+    this.getMenus()
   },
   methods: {
     handleOpen(key, keyPath) {
@@ -84,6 +105,16 @@ export default {
       console.log(222)
       sessionStorage.clear()
       this.$router.push('/login')
+    },
+    async getMenus() {
+      let res = await this.$http.get('menus')
+      console.log(res, '菜单栏')
+      if (!res.status) {
+        this.menusList = res.data
+      }
+    },
+    changeMenuCollapse() {
+      this.collapse = !this.collapse
     }
   }
 }
@@ -121,5 +152,34 @@ export default {
     font-weight: bold;
     color: #fff;
   }
+  .toggle-button {
+    font-size: 36px;
+    color: #fff;
+    margin-right: 10px;
+    // animation: all spin linear;
+    cursor: pointer;
+    transform: rotate(-90deg);
+  }
+
+  .toggle-button-active {
+    transform: rotate(0deg);
+  }
+  .toggle-button-active2 {
+    transform: rotate(-90deg);
+  }
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+.iconfont {
+  margin-right: 5px;
+}
+.el-menu {
+  border-right: none;
 }
 </style>

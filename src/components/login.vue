@@ -40,7 +40,7 @@
 <script>
 export default {
   name: 'login',
-  data () {
+  data() {
     return {
       loginForm: {
         password: '123456',
@@ -58,7 +58,7 @@ export default {
       }
     }
   },
-  mounted () {
+  mounted() {
     console.log(
       Math.random()
         .toString(36)
@@ -69,7 +69,7 @@ export default {
     // console.log("srt", str);
   },
   methods: {
-    randomString () {
+    randomString() {
       const len = 32
       const chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678'
       const maxPos = chars.length
@@ -80,22 +80,23 @@ export default {
       return character
     },
     // 登录提交
-    submitForm (formName) {
+    submitForm(formName) {
       this.$refs[formName].validate(async valid => {
         if (valid) {
           // 校验通过
           const { data: res } = await this.$http.post('login', this.loginForm)
-          if (res.meta.status !== 200) {
+          if (!res.status) {
+            this.$message({
+              message: '登录成功',
+              type: 'success'
+            })
+          } else {
             return this.$message({
-              message: res.meta.msg,
+              message: res.message,
               type: 'error'
             })
           }
-          this.$message({
-            message: '登录成功',
-            type: 'success'
-          })
-          sessionStorage.setItem('token', res.data.token)
+          sessionStorage.setItem('token', res.token)
           this.$router.push('/home')
         } else {
           console.log('error submit!!')
@@ -104,7 +105,7 @@ export default {
       })
     },
     // 重置
-    resetForm (formName) {
+    resetForm(formName) {
       this.$refs[formName].resetFields()
     }
   }
