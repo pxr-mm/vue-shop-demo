@@ -20,7 +20,7 @@
     <el-container>
       <el-aside :width="!collapse ? '200px' : '64px'" class="aside-content">
         <el-menu
-          default-active="2"
+          :default-active="activePath"
           class="el-menu-vertical-demo"
           @open="handleOpen"
           @close="handleClose"
@@ -46,6 +46,7 @@
               :index="'/'+subItem.path"
               v-for="subItem in item.children"
               :key="subItem.id"
+              @click="saveActivePath('/'+subItem.path)"
             >
               <i class="el-icon-menu"></i>
               {{ subItem.authName }}
@@ -60,38 +61,36 @@
       <el-main>
         <!-- 路由占位符 -->
         <router-view></router-view>
-        <div>
-          <swiper></swiper>
-        </div>
+        
       </el-main>
     </el-container>
   </el-container>
 </template>
 
 <script>
-// 滑动组件
-import swiper from '../components/swiper.vue'
+
 export default {
   name: 'Home',
   components: {
-    swiper
   },
   data() {
     return {
       menusList: [],
       collapse: false,
-      iconList: {
+      iconList: { //左侧导航栏对应的字体图标
         '125': 'iconfont icon-iconfonticon-shebei',
         '103': 'iconfont icon-iconfonticon-shebei1',
         '101': 'iconfont icon-iconfont_pifu',
         '102': 'iconfont icon-iconfonticon-yonghu1',
         '125': 'iconfont icon-iconfonticon-zichan',
         '145': 'iconfont icon-iconfonticon3'
-      }
+      },
+      activePath:'',//激活的导航栏
     }
   },
   created() {
     this.getMenus()
+    this.activePath = sessionStorage.getItem('activePath')
   },
   methods: {
     handleOpen(key, keyPath) {
@@ -101,20 +100,23 @@ export default {
       console.log(key, keyPath)
     },
     logout(e) {
-      // e.preventDefault()
-      console.log(222)
       sessionStorage.clear()
       this.$router.push('/login')
     },
     async getMenus() {
       let res = await this.$http.get('menus')
-      console.log(res, '菜单栏')
       if (!res.status) {
         this.menusList = res.data
       }
     },
+    // 左侧菜单栏折叠
     changeMenuCollapse() {
       this.collapse = !this.collapse
+    },
+    // 保存菜单栏激活状态
+    saveActivePath(activePath){
+      sessionStorage.setItem('activePath',activePath)
+      this.activePath = activePath
     }
   }
 }
