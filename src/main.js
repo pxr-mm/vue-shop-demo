@@ -14,7 +14,6 @@ import axios  from './utils/request'
 //   return config
 // })
 Vue.prototype.$http = axios // 通过原型使用axios
-
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 new Vue({

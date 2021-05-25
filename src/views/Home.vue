@@ -58,7 +58,7 @@
           </el-menu-item>
         </el-menu>
       </el-aside>
-      <el-main>
+      <el-main class="main-right">
         <!-- 路由占位符 -->
         <router-view></router-view>
         
@@ -169,6 +169,7 @@ export default {
   .toggle-button-active2 {
     transform: rotate(-90deg);
   }
+  // 左侧菜单折叠按钮动画
   @keyframes spin {
     from {
       transform: rotate(0deg);
@@ -183,5 +184,8 @@ export default {
 }
 .el-menu {
   border-right: none;
+}
+.main-right {
+  background-color: #eaedf2;
 }
 </style>

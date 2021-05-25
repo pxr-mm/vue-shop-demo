@@ -10,12 +10,12 @@ const httpService = axios.create({
 })
 // request拦截器
 httpService.interceptors.request.use(config =>{
-    console.log(config)
+    // console.log(config)
   if(config.url === 'login'){
       return config
   }
   config.headers.Authorization = window.sessionStorage.getItem('token')
-
+  // console.log(config)
   // config.headers[token] = store.state.token || sessionStorage.getItem('token')
   return config
 })
@@ -23,7 +23,7 @@ httpService.interceptors.request.use(config =>{
 // respone拦截器
 httpService.interceptors.response.use(
   response => {
-      console.log(' response', response)
+      // console.log(' response', response)
     // 统一处理状态
     const res = response.data
     if (response.config.url.startsWith(baseURL)) {
