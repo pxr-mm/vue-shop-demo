@@ -56,12 +56,13 @@
               type="primary"
               icon="el-icon-edit"
               size="mini"
-              @click="editRow(scope.row.id)"
+              @click="editDialogeShow(scope.row)"
             ></el-button>
             <el-button
               type="danger"
               icon="el-icon-delete"
               size="mini"
+              @click="delectConfirmShow(scope.row.id)"
             ></el-button>
             <el-tooltip content="设置" placement="top">
               <el-button
@@ -92,6 +93,7 @@
       title="添加用户"
       :visible.sync="dialogAddForm"
       @close="dialogAddFormClose"
+      width="500px"
     >
       <el-form
         :label-position="labelPosition"
@@ -123,6 +125,30 @@
         <el-button type="primary" @click="submitForm()">确 定</el-button>
       </div>
     </el-dialog>
+    <!-- 编辑用户 -->
+    <el-dialog
+      title="编辑用户信息"
+      :visible.sync="dialogEditUser"
+      width="500px"
+    >
+      <el-form :model="editForm" ref="editFormRef" :rules="editFormRules">
+        <el-form-item label="用户名" label-width="80px">
+          <el-input v-model="editForm.username" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" label-width="80px" prop="email">
+          <el-input v-model="editForm.email"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" label-width="80px" prop="mobile">
+          <el-input v-model="editForm.mobile"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogEditUser = false">取 消</el-button>
+        <el-button type="primary" @click="editFormSubmite(editForm.id)"
+          >确 定</el-button
+        >
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -130,21 +156,21 @@
 export default {
   data() {
     // 自定义校验规则
-    var checkEmail = (rule, value, callback)=>{
+    var checkEmail = (rule, value, callback) => {
       const reEmail = /^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/
-       if (reEmail.test(value)) {
+      if (reEmail.test(value)) {
         //  合法邮箱
-          return callback();
-        }
-        return callback('请输入合法的邮箱')
+        return callback()
+      }
+      return callback('请输入合法的邮箱')
     }
-    var checckMobile = (rule,value,callback) =>{
-       const reMobile = /^(13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/
-       if (reMobile.test(value)) {
+    var checckMobile = (rule, value, callback) => {
+      const reMobile = /^(13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/
+      if (reMobile.test(value)) {
         //  合法手机号
-          return callback();
-        }
-        return callback('请输入合法的手机号')
+        return callback()
+      }
+      return callback('请输入合法的手机号')
     }
     return {
       inputValue: '',
@@ -210,9 +236,28 @@ export default {
           { min: 6, max: 12, message: '长度在 3 到 10 个字符', trigger: 'blur' }
         ],
         // validator 自定义校验规则
-        mobile: [ { required: true, message: '请输入密码', trigger: 'blur' },{ validator: checckMobile, trigger: 'blur' }],
-        email: [ { required: true, message: '请输入密码', trigger: 'blur' },{ validator: checkEmail, trigger: 'blur' }]
-      }
+        mobile: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { validator: checckMobile, trigger: 'blur' }
+        ],
+        email: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { validator: checkEmail, trigger: 'blur' }
+        ]
+      },
+      editFormRules: {
+        // validator 自定义校验规则
+        mobile: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { validator: checckMobile, trigger: 'blur' }
+        ],
+        email: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { validator: checkEmail, trigger: 'blur' }
+        ]
+      },
+      dialogEditUser: false,
+      editForm: []
     }
   },
   created() {
@@ -233,10 +278,7 @@ export default {
       console.log(this.queryInfo.query, '清空')
       this.getUserList()
     },
-    // 编辑用户信息
-    editRow(row) {
-      console.log('编辑')
-    },
+
     // pageSize 每页个数
     handleSizeChange(value) {
       // console.log('个数', value)
@@ -265,28 +307,82 @@ export default {
     },
     // 添加用户
     submitForm() {
+      // 表单校验this.$refs['addUserForm'].validate()
       this.$refs['addUserForm'].validate(async vaid => {
         console.log(vaid, 'vaid')
         if (vaid) {
+          this.userList.push(this.addForm)
+          this.$message.success('添加用户成功')
+          this.dialogAddForm = false
+          return
           let res = await this.$http.post('users', this.addForm)
           if (!res.status) {
             this.$message.success('添加用户成功')
             this.dialogAddForm = false
+            this.getUserList() //刷新用户列表
           } else {
             this.$message.error('添加用户失败,' + res.error.msg)
           }
           console.log(res)
         }
       })
-      return
-      this.$http.post('users', this.addForm).then(res => {
-        console.log(res, '添加用户')
-      })
     },
     // 关闭添加
     dialogAddFormClose() {
       this.dialogAddForm = false
       this.$refs['addUserForm'].resetFields()
+    },
+    // 编辑用户信息
+    async editDialogeShow(userinfo) {
+      this.dialogEditUser = true
+      this.editForm = userinfo
+      // 此接口用不了 虚拟数据
+      // let res = await this.$http.get('users/'+ 1)
+      // this.editForm = res.data
+    }, 
+    // 编辑用户-提交
+    editFormSubmite() {
+      this.$refs['editFormRef'].validate(vaid => {
+        if (vaid) {
+          this.dialogEditUser = false
+          this.$message.success('修改成功')
+          return
+          // 修改用户信息接口
+          // let res = await this.$http.put('users' + 1, this.editForm) 
+          // if(!res.status) {
+          //   this.getUserList()
+          //   this.editForm.resetFields()
+          //   this.$message.success('修改成功')
+          // } else {
+          //   this.editForm.resetFields()
+          //   this.$message.error('修改失败')
+          // }
+          //   this.dialogEditUser = false
+        }
+      })
+    },
+    // 删除用户
+    delectConfirmShow(userid) {
+      this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.userList.forEach((el, index) => {
+            if(el.id == userid) {
+              return this.userList.splice(index,1)
+            }
+          });
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          });
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });          
+        });
     }
   }
 }
