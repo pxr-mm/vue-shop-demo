@@ -6,7 +6,7 @@ import store from '@/store'
 const baseURL = 'http://127.0.0.1:8888/api/private/v1/'
 const httpService = axios.create({
   baseURL: baseURL,
-  timeout: 3000
+  timeout: 1000
 })
 // request拦截器
 httpService.interceptors.request.use(config =>{
@@ -23,24 +23,17 @@ httpService.interceptors.request.use(config =>{
 // respone拦截器
 httpService.interceptors.response.use(
   response => {
-      // console.log(' response', response)
     // 统一处理状态
     const res = response.data
-    if (response.config.url.startsWith(baseURL)) {
-      if (res.code !== 200) {
-        // 需自定义
-        // 返回异常
-        return Promise.reject(
-          new Error({
-            status: res.code,
-            message: res.msg
-          })
-        )
-      } else {
-        return response.data
-      }
+    if(res.meta.status !== 200 && res.meta.status !== 201) {
+      // return Promise.reject(res.meta)
+      console.log(res,"respone拦截器")
+      return  res.meta
     } else {
-      return response.data
+      return {
+        data: res.data,
+        code: 200
+      }
     }
   },
   // 处理处理
@@ -90,6 +83,7 @@ httpService.interceptors.response.use(
       error.message = '连接到服务器失败'
     }
     // return Promise.reject(new Error())
+    console.log('error',error)
     return Promise.reject(error)
   }
 )

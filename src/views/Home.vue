@@ -105,6 +105,8 @@ export default {
     },
     async getMenus() {
       let res = await this.$http.get('menus')
+      // console.log(res,"菜单")
+
       if (!res.status) {
         this.menusList = res.data
       }

@@ -13,14 +13,20 @@
             placeholder="请输入内容"
             v-model="queryInfo.query"
             class="input-with-select"
-            clearable 
+            clearable
             @clear="clearQuery"
           >
-            <el-button slot="append" icon="el-icon-search" @click="searchUser"></el-button>
+            <el-button
+              slot="append"
+              icon="el-icon-search"
+              @click="searchUser"
+            ></el-button>
           </el-input>
         </el-col>
         <el-col :span="4">
-          <el-button type="primary">添加用户</el-button></el-col
+          <el-button type="primary" @click="dialogAddForm = true"
+            >添加用户</el-button
+          ></el-col
         >
       </el-row>
 
@@ -70,7 +76,7 @@
 
       <!-- 分页功能 -->
       <el-pagination
-      class="pagination"
+        class="pagination"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="queryInfo.pagenum"
@@ -81,38 +87,69 @@
       >
       </el-pagination>
     </el-card>
-    <el-card v-show="false">
-       <div>
+    <!-- 添加用户 -->
+    <el-dialog
+      title="添加用户"
+      :visible.sync="dialogAddForm"
+      @close="dialogAddFormClose"
+    >
       <el-form
         :label-position="labelPosition"
         label-width="80px"
-        :model="formLabelAlign"
-        ref="addUser"
+        :model="addForm"
+        ref="addUserForm"
+        :rules="addFormRules"
       >
-        <el-form-item label="用户名">
-          <el-input v-model="formLabelAlign.username"></el-input>
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="addForm.username" type="text"></el-input>
         </el-form-item>
-        <el-form-item label="密码">
-          <el-input v-model="formLabelAlign.password"></el-input>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="addForm.password" type="password"></el-input>
         </el-form-item>
-        <el-form-item label="角色">
-          <el-input v-model="formLabelAlign.rid"></el-input>
+        <el-form-item label="手机号" prop="mobile">
+          <el-input v-model="addForm.mobile" type="tel"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="addForm.email" type="email"></el-input>
+        </el-form-item>
+        <el-form-item label="角色" prop="rid">
+          <el-input v-model="addForm.rid"></el-input>
         </el-form-item>
       </el-form>
-      <el-button type="primary" @click="submitForm('addUser')">提交</el-button>
-    </div>
-    </el-card>
-
-   
+      <!-- <el-button type="primary" @click="submitForm('addUser')"
+          >提交</el-button> -->
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogAddFormClose">取 消</el-button>
+        <el-button type="primary" @click="submitForm()">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 export default {
   data() {
+    // 自定义校验规则
+    var checkEmail = (rule, value, callback)=>{
+      const reEmail = /^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/
+       if (reEmail.test(value)) {
+        //  合法邮箱
+          return callback();
+        }
+        return callback('请输入合法的邮箱')
+    }
+    var checckMobile = (rule,value,callback) =>{
+       const reMobile = /^(13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/
+       if (reMobile.test(value)) {
+        //  合法手机号
+          return callback();
+        }
+        return callback('请输入合法的手机号')
+    }
     return {
       inputValue: '',
       value: true,
+      dialogAddForm: false, //添加用户dialog
       userList: [
         //用户列表
         {
@@ -124,7 +161,7 @@ export default {
           mg_state: true
         },
         {
-           id: 10,
+          id: 10,
           username: '小王',
           email: '1234562qq.com',
           mobile: 13627836884,
@@ -132,7 +169,7 @@ export default {
           mg_state: false
         },
         {
-           id: 15,
+          id: 15,
           username: '小王',
           email: '1234562qq.com',
           mobile: 13627836884,
@@ -140,7 +177,7 @@ export default {
           mg_state: false
         },
         {
-           id: 1,
+          id: 1,
           username: '小王',
           email: '1234562qq.com',
           mobile: 13627836884,
@@ -151,33 +188,49 @@ export default {
       queryInfo: {
         query: '',
         pagesize: 1,
-        pagenum: 2,
+        pagenum: 2
       },
-      labelPosition:'left',
-      formLabelAlign: { //添加用户
-          username: '',
-          password: '',
-          rid: ''
-        }
+      labelPosition: 'left',
+      addForm: {
+        //添加用户
+        username: '',
+        password: '',
+        rid: '',
+        email: '',
+        mobile: ''
+      },
+      addFormRules: {
+        // 添加用户form 规则
+        username: [
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 6, max: 12, message: '长度在 3 到 10 个字符', trigger: 'blur' }
+        ],
+        // validator 自定义校验规则
+        mobile: [ { required: true, message: '请输入密码', trigger: 'blur' },{ validator: checckMobile, trigger: 'blur' }],
+        email: [ { required: true, message: '请输入密码', trigger: 'blur' },{ validator: checkEmail, trigger: 'blur' }]
+      }
     }
   },
   created() {
     this.getUserList()
-   
   },
   methods: {
     // 获取用户列表（接口有问题）
     async getUserList() {
       let data = await this.$http.get('users', this.queryInfo)
       // this.userList = data.data
-      // console.log(data, '用户列表')
+      console.log(data, '用户列表')
     },
     // 搜索用户信息
     searchUser() {
       this.getUserList()
     },
     clearQuery() {
-      console.log(this.queryInfo.query,"清空")
+      console.log(this.queryInfo.query, '清空')
       this.getUserList()
     },
     // 编辑用户信息
@@ -196,10 +249,10 @@ export default {
       this.queryInfo.pagesize = value
       this.getUserList()
     },
+    // 修改用户状态
     async userStatusChange(userinfo) {
-      // 修改用户状态
-      console.log('row',userinfo)
-      this.$message.success('更新用户状态成功啦');
+      console.log('row', userinfo)
+      this.$message.success('更新用户状态成功啦')
       // 用户接口有问题
       // const {data:res} = await this.$http.put(`users/${userinfo.id}/state/${userinfo.mg_state}`)
       // console.log(res,"修改用户状态")
@@ -211,11 +264,29 @@ export default {
       //   }
     },
     // 添加用户
-    submitForm (from) {
-      console.log(this.formLabelAlign)
-      this.$http.post('users',this.formLabelAlign).then(res =>{
-        console.log(res,'添加用户')
+    submitForm() {
+      this.$refs['addUserForm'].validate(async vaid => {
+        console.log(vaid, 'vaid')
+        if (vaid) {
+          let res = await this.$http.post('users', this.addForm)
+          if (!res.status) {
+            this.$message.success('添加用户成功')
+            this.dialogAddForm = false
+          } else {
+            this.$message.error('添加用户失败,' + res.error.msg)
+          }
+          console.log(res)
+        }
       })
+      return
+      this.$http.post('users', this.addForm).then(res => {
+        console.log(res, '添加用户')
+      })
+    },
+    // 关闭添加
+    dialogAddFormClose() {
+      this.dialogAddForm = false
+      this.$refs['addUserForm'].resetFields()
     }
   }
 }
