@@ -21,6 +21,18 @@ const routes = [
       {
         path: '/users',
         component: () => import('../views/Users/user.vue')
+      },
+      {
+        path: '/rights',
+        component: () => import('../views/power/rights.vue')
+      },
+      {
+        path: '/roles',
+        component: () => import('../views/power/roles.vue')
+      },
+      {
+        path: '/goods',
+        component: () => import('../views/goodsManagement/goods.vue')
       }
     ]
   },

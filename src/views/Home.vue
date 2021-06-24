@@ -41,7 +41,7 @@
               <i :class="iconList[item.id]"></i>
               <span>{{ item.authName }}</span>
             </template>
-            <!-- 二级菜单 -->
+            <!-- 二级菜单 router路由跳转名 对应二级菜单的index属性值-->
             <el-menu-item
               :index="'/'+subItem.path"
               v-for="subItem in item.children"

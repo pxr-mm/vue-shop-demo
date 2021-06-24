@@ -27,7 +27,7 @@ httpService.interceptors.response.use(
     const res = response.data
     if(res.meta.status !== 200 && res.meta.status !== 201) {
       // return Promise.reject(res.meta)
-      console.log(res,"respone拦截器")
+      // console.log(res,"respone拦截器")
       return  res.meta
     } else {
       return {
