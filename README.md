@@ -1,4 +1,4 @@
-
+基于vue2的demo
 # vue-element-shop
 # vue_shop
 
